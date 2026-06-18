@@ -40,7 +40,7 @@ def load_questions(file_path: str = "questions.json") -> list:
         logger.error(f"Непредвиденная ошибка при загрузке вопросов: {e}")
         return []
 
-Qestions_db = load_questions()
+Questions_db = load_questions()
 
 def replyKeyboard():
     btn1 = KeyboardButton(text = '🚀 Начать учиться')
@@ -62,15 +62,25 @@ def get_level_keyboard():
     ]
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
+def get_question_inline_keyboard(options: list):
+    keyboard = []
+    for i, option in enumerate(options):
+        keyboard.append([InlineKeyboardButton(text=option, callback_data=str(i))])
+    return InlineKeyboardMarkup(inline_keyboard=keyboard)
+
+def get_questions_by_level(level: int) -> list:
+    
+    return [q for q in Questions_db if q.get("level") == level]
+
 @router.message(Command('start'))
 @router.message(F.text.lower() == 'старт')
 async def start(message: Message):
     await message.answer("""Привет! Я - Фибик🤖 и я помогу тебе с освоением программирования по теоритической части. 
-                         Просто скажи,что мне сделать?""",
+Просто скажи,что мне сделать?""",
                         reply_markup=replyKeyboard())
 
 @router.message(Command('help'))
-@router.message(F.text.lower() == 'помощь')
+@router.message(F.text.func(lambda text: 'помощь' in text.lower()))
 async def help(message: Message):
     await message.answer('Список команд:\n'
                          'Напишите "старт" или выполните команду /start , чтобы перезапустить меня\n'
