@@ -434,10 +434,22 @@
     "question": "На вход программе подаются два целых числа, каждое с новой строки. Выведите их сумму.",
     "code_template": "a = int(input())\nb = int(input())\n# Ваш код здесь\n",
     "tests": [
-      {"input": "5\n3", "output": "8"},
-      {"input": "10\n20", "output": "30"},
-      {"input": "-5\n5", "output": "0"},
-      {"input": "100\n-50", "output": "50"}
+      {
+        "input": "5\n3",
+        "output": "8"
+      },
+      {
+        "input": "10\n20",
+        "output": "30"
+      },
+      {
+        "input": "-5\n5",
+        "output": "0"
+      },
+      {
+        "input": "100\n-50",
+        "output": "50"
+      }
     ],
     "explanation": "Используйте функцию print(a + b) для вывода суммы двух чисел.",
     "level": 1,
@@ -447,10 +459,22 @@
     "question": "На вход программе подается целое число. Выведите его квадрат.",
     "code_template": "n = int(input())\n# Ваш код здесь\n",
     "tests": [
-      {"input": "3", "output": "9"},
-      {"input": "5", "output": "25"},
-      {"input": "-4", "output": "16"},
-      {"input": "0", "output": "0"}
+      {
+        "input": "3",
+        "output": "9"
+      },
+      {
+        "input": "5",
+        "output": "25"
+      },
+      {
+        "input": "-4",
+        "output": "16"
+      },
+      {
+        "input": "0",
+        "output": "0"
+      }
     ],
     "explanation": "Квадрат числа можно вычислить как n ** 2 или n * n.",
     "level": 1,
@@ -460,10 +484,22 @@
     "question": "На вход программе подается целое число. Выведите следующее за ним четное число (то есть ближайшее четное число, которое больше введенного).",
     "code_template": "n = int(input())\n# Ваш код здесь\n",
     "tests": [
-      {"input": "7", "output": "8"},
-      {"input": "6", "output": "8"},
-      {"input": "-3", "output": "-2"},
-      {"input": "0", "output": "2"}
+      {
+        "input": "7",
+        "output": "8"
+      },
+      {
+        "input": "6",
+        "output": "8"
+      },
+      {
+        "input": "-3",
+        "output": "-2"
+      },
+      {
+        "input": "0",
+        "output": "2"
+      }
     ],
     "explanation": "Можно использовать формулу: n + 2 - n % 2. Или проверить четность через if и прибавить 1 или 2.",
     "level": 1,
@@ -473,10 +509,22 @@
     "question": "На вход программе подается натуральное число. Найдите сумму его цифр и выведите результат.",
     "code_template": "n = input()\n# Ваш код здесь\n",
     "tests": [
-      {"input": "123", "output": "6"},
-      {"input": "456", "output": "15"},
-      {"input": "100", "output": "1"},
-      {"input": "9999", "output": "36"}
+      {
+        "input": "123",
+        "output": "6"
+      },
+      {
+        "input": "456",
+        "output": "15"
+      },
+      {
+        "input": "100",
+        "output": "1"
+      },
+      {
+        "input": "9999",
+        "output": "36"
+      }
     ],
     "explanation": "Можно преобразовать число в строку и пройтись циклом по символам, переводя каждый в int: sum(int(d) for d in input()).",
     "level": 2,
@@ -486,11 +534,26 @@
     "question": "На вход программе подается целое число n. Выведите значение факториала этого числа (n!). Факториал 0 равен 1.",
     "code_template": "n = int(input())\n# Ваш код здесь\n",
     "tests": [
-      {"input": "5", "output": "120"},
-      {"input": "3", "output": "6"},
-      {"input": "0", "output": "1"},
-      {"input": "1", "output": "1"},
-      {"input": "7", "output": "5040"}
+      {
+        "input": "5",
+        "output": "120"
+      },
+      {
+        "input": "3",
+        "output": "6"
+      },
+      {
+        "input": "0",
+        "output": "1"
+      },
+      {
+        "input": "1",
+        "output": "1"
+      },
+      {
+        "input": "7",
+        "output": "5040"
+      }
     ],
     "explanation": "Можно использовать цикл for с накоплением произведения или импортировать math.factorial.",
     "level": 2,
@@ -500,10 +563,22 @@
     "question": "На вход программе подается строка. Выведите её в обратном порядке.",
     "code_template": "s = input()\n# Ваш код здесь\n",
     "tests": [
-      {"input": "hello", "output": "olleh"},
-      {"input": "python", "output": "nohtyp"},
-      {"input": "a", "output": "a"},
-      {"input": "abcd", "output": "dcba"}
+      {
+        "input": "hello",
+        "output": "olleh"
+      },
+      {
+        "input": "python",
+        "output": "nohtyp"
+      },
+      {
+        "input": "a",
+        "output": "a"
+      },
+      {
+        "input": "abcd",
+        "output": "dcba"
+      }
     ],
     "explanation": "Строку можно развернуть срезом: s[::-1].",
     "level": 2,
@@ -513,10 +588,22 @@
     "question": "На вход программе сначала подается число n — количество элементов, затем n целых чисел через пробел. Выведите количество четных чисел среди них.",
     "code_template": "n = int(input())\nnums = list(map(int, input().split()))\n# Ваш код здесь\n",
     "tests": [
-      {"input": "5\n1 2 3 4 5", "output": "2"},
-      {"input": "4\n2 4 6 8", "output": "4"},
-      {"input": "3\n1 3 5", "output": "0"},
-      {"input": "6\n10 11 12 13 14 15", "output": "3"}
+      {
+        "input": "5\n1 2 3 4 5",
+        "output": "2"
+      },
+      {
+        "input": "4\n2 4 6 8",
+        "output": "4"
+      },
+      {
+        "input": "3\n1 3 5",
+        "output": "0"
+      },
+      {
+        "input": "6\n10 11 12 13 14 15",
+        "output": "3"
+      }
     ],
     "explanation": "Можно использовать генератор списка: sum(1 for x in nums if x % 2 == 0) или цикл с счетчиком.",
     "level": 2,
@@ -526,10 +613,22 @@
     "question": "На вход программе подаются три целых числа, каждое с новой строки. Выведите наибольшее из них.",
     "code_template": "a = int(input())\nb = int(input())\nc = int(input())\n# Ваш код здесь\n",
     "tests": [
-      {"input": "5\n3\n8", "output": "8"},
-      {"input": "10\n20\n15", "output": "20"},
-      {"input": "7\n7\n7", "output": "7"},
-      {"input": "-5\n-3\n-10", "output": "-3"}
+      {
+        "input": "5\n3\n8",
+        "output": "8"
+      },
+      {
+        "input": "10\n20\n15",
+        "output": "20"
+      },
+      {
+        "input": "7\n7\n7",
+        "output": "7"
+      },
+      {
+        "input": "-5\n-3\n-10",
+        "output": "-3"
+      }
     ],
     "explanation": "Используйте встроенную функцию max(a, b, c).",
     "level": 2,
@@ -539,10 +638,22 @@
     "question": "На вход программе подается натуральное число n. Выведите сумму всех целых чисел от 1 до n включительно.",
     "code_template": "n = int(input())\n# Ваш код здесь\n",
     "tests": [
-      {"input": "5", "output": "15"},
-      {"input": "10", "output": "55"},
-      {"input": "1", "output": "1"},
-      {"input": "100", "output": "5050"}
+      {
+        "input": "5",
+        "output": "15"
+      },
+      {
+        "input": "10",
+        "output": "55"
+      },
+      {
+        "input": "1",
+        "output": "1"
+      },
+      {
+        "input": "100",
+        "output": "5050"
+      }
     ],
     "explanation": "Можно использовать формулу n * (n + 1) // 2 или цикл for с накоплением суммы.",
     "level": 2,
@@ -552,10 +663,22 @@
     "question": "На вход программе подается натуральное число N. Требуется создать двумерный список размером N x N из единиц, а в последний столбец записать пятерки. Вывести список на экран в виде таблицы чисел. P.S. В конце строк пробелов быть не должно!",
     "code_template": "n = int(input())\n# Ваш код здесь\n",
     "tests": [
-      {"input": "4", "output": "1 1 1 5\n1 1 1 5\n1 1 1 5\n1 1 1 5"},
-      {"input": "3", "output": "1 1 5\n1 1 5\n1 1 5"},
-      {"input": "2", "output": "1 5\n1 5"},
-      {"input": "5", "output": "1 1 1 1 5\n1 1 1 1 5\n1 1 1 1 5\n1 1 1 1 5\n1 1 1 1 5"}
+      {
+        "input": "4",
+        "output": "1 1 1 5\n1 1 1 5\n1 1 1 5\n1 1 1 5"
+      },
+      {
+        "input": "3",
+        "output": "1 1 5\n1 1 5\n1 1 5"
+      },
+      {
+        "input": "2",
+        "output": "1 5\n1 5"
+      },
+      {
+        "input": "5",
+        "output": "1 1 1 1 5\n1 1 1 1 5\n1 1 1 1 5\n1 1 1 1 5\n1 1 1 1 5"
+      }
     ],
     "explanation": "Создаем список [[1]*N for _ in range(N)], затем в каждой строке заменяем последний элемент на 5. Выводим через ' '.join(map(str, row)).",
     "level": 3,
@@ -565,11 +688,26 @@
     "question": "На вход программе подается строка. Проверьте, является ли она палиндромом (читается одинаково слева направо и справа налево). Выведите 'YES' если палиндром, иначе 'NO'.",
     "code_template": "s = input()\n# Ваш код здесь\n",
     "tests": [
-      {"input": "radar", "output": "YES"},
-      {"input": "hello", "output": "NO"},
-      {"input": "a", "output": "YES"},
-      {"input": "abba", "output": "YES"},
-      {"input": "python", "output": "NO"}
+      {
+        "input": "radar",
+        "output": "YES"
+      },
+      {
+        "input": "hello",
+        "output": "NO"
+      },
+      {
+        "input": "a",
+        "output": "YES"
+      },
+      {
+        "input": "abba",
+        "output": "YES"
+      },
+      {
+        "input": "python",
+        "output": "NO"
+      }
     ],
     "explanation": "Сравните строку с её разворотом: s == s[::-1].",
     "level": 3,
@@ -579,10 +717,22 @@
     "question": "На вход программе подается список целых чисел через пробел. Отсортируйте его по возрастанию и выведите через пробел.",
     "code_template": "nums = list(map(int, input().split()))\n# Ваш код здесь\n",
     "tests": [
-      {"input": "5 3 8 1 2", "output": "1 2 3 5 8"},
-      {"input": "10 20 30", "output": "10 20 30"},
-      {"input": "9 8 7 6 5", "output": "5 6 7 8 9"},
-      {"input": "1", "output": "1"}
+      {
+        "input": "5 3 8 1 2",
+        "output": "1 2 3 5 8"
+      },
+      {
+        "input": "10 20 30",
+        "output": "10 20 30"
+      },
+      {
+        "input": "9 8 7 6 5",
+        "output": "5 6 7 8 9"
+      },
+      {
+        "input": "1",
+        "output": "1"
+      }
     ],
     "explanation": "Используйте метод sort() или функцию sorted(), затем выведите через ' '.join(map(str, nums)).",
     "level": 3,
@@ -592,13 +742,45 @@
     "question": "На вход программе подается натуральное число n. Выведите n-ое число Фибоначчи (F(0)=0, F(1)=1, F(2)=1, F(3)=2, ...).",
     "code_template": "n = int(input())\n# Ваш код здесь\n",
     "tests": [
-      {"input": "0", "output": "0"},
-      {"input": "1", "output": "1"},
-      {"input": "5", "output": "5"},
-      {"input": "10", "output": "55"},
-      {"input": "7", "output": "13"}
+      {
+        "input": "0",
+        "output": "0"
+      },
+      {
+        "input": "1",
+        "output": "1"
+      },
+      {
+        "input": "5",
+        "output": "5"
+      },
+      {
+        "input": "10",
+        "output": "55"
+      },
+      {
+        "input": "7",
+        "output": "13"
+      }
     ],
     "explanation": "Используйте цикл с двумя переменными: a, b = b, a + b, выполняя его n раз.",
+    "level": 3,
+    "type": "code_test"
+  },
+  {
+    "question": "123",
+    "code_template": "n = int(input())\n# Ваш код здесь",
+    "tests": [
+      {
+        "input": "4",
+        "output": "1 1 1 5\n1 1 1 5\n1 1 1 5\n1 1 1 5"
+      },
+      {
+        "input": "3",
+        "output": "1 1 5\n1 1 5\n1 1 5"
+      }
+    ],
+    "explanation": "123",
     "level": 3,
     "type": "code_test"
   }

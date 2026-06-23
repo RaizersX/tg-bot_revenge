@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from quest import QuizState
 import random
 import logging
-
+import html
 logger = logging.getLogger(__name__)
 
 open_questions_router = Router()
@@ -39,7 +39,6 @@ def check_answer(user_answer: str, correct_answer: str) -> bool:
     
     return False
 
-
 @open_questions_router.message(QuizState.waiting_for_answer, F.text & ~F.text.startswith('/'))
 async def process_open_answer(message: Message, state: FSMContext):
     """Обработка текстового ответа на открытый вопрос"""
@@ -49,19 +48,31 @@ async def process_open_answer(message: Message, state: FSMContext):
     if not current_question:
         return
     
-    # Проверяем, что это открытый вопрос
     if not is_open_question(current_question):
         return
     
     user_answer = message.text.strip()
     correct_answer = current_question.get('correct_answer', '')
     
-    # Проверяем правильность ответа
     if check_answer(user_answer, correct_answer):
         result_text = "✅ Правильно! Молодец!"
     else:
         explanation = current_question.get('explanation', 'Объяснение отсутствует.')
-        result_text = f"❌ Неверно.\n\n<b>Правильный ответ:</b> {correct_answer}\n\n<b>Почему:</b> {explanation}"
+        result_text = f"❌ Неверно.\n\n<b>Правильный ответ:</b> {html.escape(correct_answer)}\n\n<b>Почему:</b> {html.escape(explanation)}"
+    
+    # ⬇ СОХРАНЯЕМ важные данные перед очисткой
+    current_level = data.get('current_level')
+    questions_queue = data.get('questions_queue', [])
+    current_question_index = data.get('current_question_index', 0)
+    
+    await state.clear()
+    
+    # ⬇ ВОССТАНАВЛИВАЕМ данные
+    await state.update_data(
+        current_level=current_level,
+        questions_queue=questions_queue,
+        current_question_index=current_question_index
+    )
     
     await message.answer(
         result_text,
@@ -71,9 +82,3 @@ async def process_open_answer(message: Message, state: FSMContext):
             [InlineKeyboardButton(text="🔄 Сменить уровень", callback_data="change_level")]
         ])
     )
-    
-    # Очищаем состояние, но сохраняем уровень
-    current_level = data.get('current_level')
-    await state.clear()
-    if current_level:
-        await state.update_data(current_level=current_level)
