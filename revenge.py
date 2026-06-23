@@ -270,23 +270,10 @@ async def start_add_question(message: Message, state: FSMContext):
         await message.answer("❌ У вас нет прав для выполнения этой команды.")
         return
     
-    await state.set_state(AddQuestionState.waiting_for_question)
-    await message.answer(
-        "📝 <b>Добавление нового вопроса</b>\n\n"
-        "Шаг 1/6: Введите текст вопроса:",
-        parse_mode="HTML"
-    )
-
-@router.message(AddQuestionState.waiting_for_question)
-async def process_question_text(message: Message, state: FSMContext):
-    if not is_admin(message):
-        return
-    
-    await state.update_data(question_text=message.text)
     await state.set_state(AddQuestionState.waiting_for_question_type)
     await message.answer(
-        "✅ Текст вопроса сохранен.\n\n"
-        "Шаг 2/6: Выберите тип вопроса:\n\n"
+        "📝 <b>Добавление нового вопроса</b>\n\n"
+        "Шаг 1: Выберите тип вопроса:\n\n"
         "1️⃣ <b>С вариантами ответов</b> (пользователь выбирает из списка)\n"
         "2️⃣ <b>Открытый вопрос</b> (пользователь вводит ответ текстом)\n\n"
         "Введите 1 или 2:",
@@ -300,9 +287,37 @@ async def process_question_type(message: Message, state: FSMContext):
     
     if message.text.strip() == '1':
         await state.update_data(question_type='options')
-        await state.set_state(AddQuestionState.waiting_for_options)
+        await state.set_state(AddQuestionState.waiting_for_question)
         await message.answer(
             "✅ Выбран тип: с вариантами ответов.\n\n"
+            "Шаг 2/6: Введите текст вопроса:",
+            parse_mode="HTML"
+        )
+    elif message.text.strip() == '2':
+        await state.update_data(question_type='open')
+        await state.set_state(AddQuestionState.waiting_for_question)
+        await message.answer(
+            "✅ Выбран тип: открытый вопрос.\n\n"
+            "Шаг 2/5: Введите текст вопроса:",
+            parse_mode="HTML"
+        )
+    else:
+        await message.answer("❌ Введите 1 или 2.")
+
+@router.message(AddQuestionState.waiting_for_question)
+async def process_question_text(message: Message, state: FSMContext):
+    if not is_admin(message):
+        return
+    
+    await state.update_data(question_text=message.text)
+    
+    data = await state.get_data()
+    question_type = data.get('question_type')
+    
+    if question_type == 'options':
+        await state.set_state(AddQuestionState.waiting_for_options)
+        await message.answer(
+            "✅ Текст вопроса сохранен.\n\n"
             "Шаг 3/6: Введите варианты ответов (каждый вариант с новой строки).\n"
             "Минимум 2 варианта, максимум 10.\n\n"
             "<b>Пример:</b>\n"
@@ -311,31 +326,14 @@ async def process_question_type(message: Message, state: FSMContext):
             "Вариант 3",
             parse_mode="HTML"
         )
-    elif message.text.strip() == '2':
-        await state.update_data(question_type='open')
+    else:  # open
         await state.set_state(AddQuestionState.waiting_for_correct_answer)
         await message.answer(
-            "✅ Выбран тип: открытый вопрос.\n\n"
-            "Шаг 4/6: Введите правильный ответ:\n\n"
+            "✅ Текст вопроса сохранен.\n\n"
+            "Шаг 3/5: Введите правильный ответ:\n\n"
             "<i>Примечание: бот будет проверять ответ с учетом регистра и возможных опечаток.</i>",
             parse_mode="HTML"
         )
-    else:
-        await message.answer("❌ Введите 1 или 2.")
-
-@router.message(AddQuestionState.waiting_for_correct_answer)
-async def process_correct_answer(message: Message, state: FSMContext):
-    if not is_admin(message):
-        return
-    
-    await state.update_data(correct_answer=message.text.strip())
-    await state.set_state(AddQuestionState.waiting_for_explanation)
-    await message.answer(
-        "✅ Правильный ответ сохранен.\n\n"
-        "Шаг 5/6: Введите объяснение правильного ответа "
-        "(почему этот ответ верный):",
-        parse_mode="HTML"
-    )
 
 @router.message(AddQuestionState.waiting_for_options)
 async def process_options(message: Message, state: FSMContext):
@@ -354,11 +352,12 @@ async def process_options(message: Message, state: FSMContext):
     await state.update_data(options=options)
     await state.set_state(AddQuestionState.waiting_for_correct_index)
     
+    # Показываем пронумерованные варианты
     options_text = "\n".join([f"{i+1}. {opt}" for i, opt in enumerate(options)])
     await message.answer(
         "✅ Варианты сохранены.\n\n"
         f"<b>Ваши варианты:</b>\n{options_text}\n\n"
-        "Шаг 3/5: Введите номер правильного ответа (1, 2, 3...):",
+        "Шаг 4/6: Введите номер правильного ответа (1, 2, 3...):",
         parse_mode="HTML"
     )
 
@@ -380,12 +379,26 @@ async def process_correct_index(message: Message, state: FSMContext):
         await state.set_state(AddQuestionState.waiting_for_explanation)
         await message.answer(
             "✅ Правильный ответ сохранен.\n\n"
-            "Шаг 4/5: Введите объяснение правильного ответа "
+            "Шаг 5/6: Введите объяснение правильного ответа "
             "(почему этот ответ верный):",
             parse_mode="HTML"
         )
     except ValueError:
         await message.answer("❌ Введите число. Попробуйте снова:")
+
+@router.message(AddQuestionState.waiting_for_correct_answer)
+async def process_correct_answer(message: Message, state: FSMContext):
+    if not is_admin(message):
+        return
+    
+    await state.update_data(correct_answer=message.text.strip())
+    await state.set_state(AddQuestionState.waiting_for_explanation)
+    await message.answer(
+        "✅ Правильный ответ сохранен.\n\n"
+        "Шаг 4/5: Введите объяснение правильного ответа "
+        "(почему этот ответ верный):",
+        parse_mode="HTML"
+    )
 
 @router.message(AddQuestionState.waiting_for_explanation)
 async def process_explanation(message: Message, state: FSMContext):
@@ -395,15 +408,79 @@ async def process_explanation(message: Message, state: FSMContext):
     await state.update_data(explanation=message.text)
     await state.set_state(AddQuestionState.waiting_for_level)
     
+    data = await state.get_data()
+    question_type = data.get('question_type')
+    
+    if question_type == 'options':
+        step_text = "Шаг 6/6: Выберите уровень сложности:\n"
+    else:
+        step_text = "Шаг 5/5: Выберите уровень сложности:\n"
+    
     await message.answer(
         "✅ Объяснение сохранено.\n\n"
-        "Шаг 5/5: Выберите уровень сложности:\n"
+        f"{step_text}"
         "1 - Легкий\n"
         "2 - Средний\n"
         "3 - Сложный",
         parse_mode="HTML"
     )
 
+@router.message(AddQuestionState.waiting_for_level)
+async def process_level(message: Message, state: FSMContext):
+    if not is_admin(message):
+        return
+    
+    try:
+        level = int(message.text)
+        if level not in [1, 2, 3]:
+            await message.answer("❌ Уровень должен быть 1, 2 или 3. Попробуйте снова:")
+            return
+    except ValueError:
+        await message.answer("❌ Введите число (1, 2 или 3). Попробуйте снова:")
+        return
+    
+    data = await state.get_data()
+    question_type = data.get('question_type')
+    
+    if question_type == 'open':
+        new_question = {
+            "question": data.get('question_text'),
+            "correct_answer": data.get('correct_answer'),
+            "explanation": data.get('explanation'),
+            "level": level
+        }
+        question_info = f"<b>Ответ:</b> {new_question['correct_answer']}"
+    else:
+        new_question = {
+            "question": data.get('question_text'),
+            "options": data.get('options'),
+            "correct_index": data.get('correct_index'),
+            "explanation": data.get('explanation'),
+            "level": level
+        }
+        question_info = f"<b>Вариантов:</b> {len(new_question['options'])}"
+    
+    Questions_db.append(new_question)
+    
+    if save_questions(Questions_db):
+        type_name = "открытый" if question_type == 'open' else "с вариантами"
+        await message.answer(
+            f"✅ <b>Вопрос ({type_name}) успешно добавлен!</b>\n\n"
+            f"<b>Вопрос:</b> {new_question['question']}\n"
+            f"<b>Уровень:</b> {level}\n"
+            f"{question_info}\n\n"
+            "Теперь этот вопрос доступен для викторины.",
+            parse_mode="HTML",
+            reply_markup=replyKeyboard()
+        )
+    else:
+        await message.answer(
+            "❌ Ошибка при сохранении вопроса в файл. "
+            "Вопрос добавлен в память, но может быть потерян при перезапуске.",
+            reply_markup=replyKeyboard()
+        )
+    
+    await state.clear()
 @router.message(AddQuestionState.waiting_for_level)
 async def process_level(message: Message, state: FSMContext):
     if not is_admin(message):
