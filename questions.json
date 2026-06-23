@@ -1,4 +1,5 @@
 [
+<<<<<<< HEAD
     {
         "question": "Как называется присваивание вида a = b = c = 0?",
         "options": [
@@ -352,4 +353,78 @@
         "level": 3,
         "explanation": "4-4 равно 0, а bool(0) всегда возвращает False."
     }
+=======
+  {
+    "question": "Какой тип данных используется для хранения целых чисел в Python?",
+    "options": [
+      "str",
+      "int",
+      "float",
+      "bool"
+    ],
+    "correct_index": 1,
+    "level": 1,
+    "explanation": 4
+  },
+  {
+    "question": "Что выведет print(2 ** 3)?",
+    "options": [
+      "6",
+      "8",
+      "9",
+      "5"
+    ],
+    "correct_index": 1,
+    "level": 1,
+    "explanation": 4
+  },
+  {
+    "question": "Как объявить переменную в JavaScript?",
+    "options": [
+      "var/let/const",
+      "int",
+      "dim",
+      "variable"
+    ],
+    "correct_index": 0,
+    "level": 1,
+    "explanation": 4
+  },
+  {
+    "question": "Что такое рекурсия в программировании?",
+    "options": [
+      "Цикл for",
+      "Функция, вызывающая саму себя",
+      "Тип данных",
+      "Метод сортировки"
+    ],
+    "correct_index": 1,
+    "level": 2,
+    "explanation": 4
+  },
+  {
+    "question": "Какова временная сложность бинарного поиска?",
+    "options": [
+      "O(n)",
+      "O(log n)",
+      "O(n^2)",
+      "O(1)"
+    ],
+    "correct_index": 1,
+    "level": 3,
+    "explanation": 4
+  },
+  {
+    "question": "Что делает декоратор @staticmethod в Python?",
+    "options": [
+      "Делает метод приватным",
+      "Привязывает метод к классу, а не к экземпляру",
+      "Запрещает переопределение",
+      "Автоматически вызывает метод"
+    ],
+    "correct_index": 1,
+    "level": 3,
+    "explanation": 4
+  }
+>>>>>>> origin/main
 ]
