@@ -18,6 +18,7 @@ import json
 import logging
 from dotenv import load_dotenv
 from os import getenv
+from open_ans import open_questions_router, is_open_question
 
 
 load_dotenv()
@@ -152,10 +153,8 @@ async def process_level_selection(callback: CallbackQuery, state: FSMContext):
     level = int(callback.data.split("_")[1]) 
     logger.info(f"Пользователь {callback.from_user.id} выбрал уровень {level}.")
     
-    # Сохраняем уровень в состояние
     await state.update_data(current_level=level)
     
-    # Фильтруем вопросы по уровню
     available_questions = get_questions_by_level(level)
     
     if not available_questions:
@@ -171,13 +170,23 @@ async def process_level_selection(callback: CallbackQuery, state: FSMContext):
     await state.update_data(current_question=question_data)
     await state.set_state(QuizState.waiting_for_answer)
     
-    await callback.message.edit_text(
-        f"📝 <b>Вопрос (Уровень {level}):</b>\n{question_data['question']}",
-        reply_markup=get_question_inline_keyboard(question_data['options']),
-        parse_mode="HTML"
-    )
+    # Проверяем тип вопроса
+    if is_open_question(question_data):
+        # Открытый вопрос
+        await callback.message.edit_text(
+            f"📝 <b>Вопрос (Уровень {level}):</b>\n{question_data['question']}\n\n💬 <i>Введите ваш ответ текстом:</i>",
+            reply_markup=None,
+            parse_mode="HTML"
+        )
+    else:
+        # Вопрос с вариантами
+        await callback.message.edit_text(
+            f"📝 <b>Вопрос (Уровень {level}):</b>\n{question_data['question']}",
+            reply_markup=get_question_inline_keyboard(question_data['options']),
+            parse_mode="HTML"
+        )
+    
     await callback.answer()
-
     
 @router.callback_query(QuizState.waiting_for_answer, F.data.isdigit())
 async def process_quiz_answer_v2(callback: CallbackQuery, state: FSMContext):
@@ -210,7 +219,6 @@ async def process_quiz_answer_v2(callback: CallbackQuery, state: FSMContext):
             [InlineKeyboardButton(text="🔄 Сменить уровень", callback_data="change_level")]
         ])
     )
-
 @router.callback_query(F.data == "next_question")
 async def next_question_handler(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
@@ -229,13 +237,20 @@ async def next_question_handler(callback: CallbackQuery, state: FSMContext):
     await state.update_data(current_question=question_data)
     await state.set_state(QuizState.waiting_for_answer)
     
-    await callback.message.answer(
-        f"📝 <b>Новый вопрос (Уровень {current_level}):</b>\n{question_data['question']}",
-        reply_markup=get_question_inline_keyboard(question_data['options']),
-        parse_mode="HTML"
-    )
+    # Проверяем тип вопроса
+    if is_open_question(question_data):
+        await callback.message.answer(
+            f"📝 <b>Новый вопрос (Уровень {current_level}):</b>\n{question_data['question']}\n\n💬 <i>Введите ваш ответ текстом:</i>",
+            parse_mode="HTML"
+        )
+    else:
+        await callback.message.answer(
+            f"📝 <b>Новый вопрос (Уровень {current_level}):</b>\n{question_data['question']}",
+            reply_markup=get_question_inline_keyboard(question_data['options']),
+            parse_mode="HTML"
+        )
+    
     await callback.answer()
-
 
 @router.callback_query(F.data == "change_level")
 async def change_level_handler(callback: CallbackQuery, state: FSMContext):
@@ -258,7 +273,7 @@ async def start_add_question(message: Message, state: FSMContext):
     await state.set_state(AddQuestionState.waiting_for_question)
     await message.answer(
         "📝 <b>Добавление нового вопроса</b>\n\n"
-        "Шаг 1/5: Введите текст вопроса:",
+        "Шаг 1/6: Введите текст вопроса:",
         parse_mode="HTML"
     )
 
@@ -268,15 +283,57 @@ async def process_question_text(message: Message, state: FSMContext):
         return
     
     await state.update_data(question_text=message.text)
-    await state.set_state(AddQuestionState.waiting_for_options)
+    await state.set_state(AddQuestionState.waiting_for_question_type)
     await message.answer(
         "✅ Текст вопроса сохранен.\n\n"
-        "Шаг 2/5: Введите варианты ответов (каждый вариант с новой строки).\n"
-        "Минимум 2 варианта, максимум 10.\n\n"
-        "<b>Пример:</b>\n"
-        "Вариант 1\n"
-        "Вариант 2\n"
-        "Вариант 3",
+        "Шаг 2/6: Выберите тип вопроса:\n\n"
+        "1️⃣ <b>С вариантами ответов</b> (пользователь выбирает из списка)\n"
+        "2️⃣ <b>Открытый вопрос</b> (пользователь вводит ответ текстом)\n\n"
+        "Введите 1 или 2:",
+        parse_mode="HTML"
+    )
+
+@router.message(AddQuestionState.waiting_for_question_type)
+async def process_question_type(message: Message, state: FSMContext):
+    if not is_admin(message):
+        return
+    
+    if message.text.strip() == '1':
+        await state.update_data(question_type='options')
+        await state.set_state(AddQuestionState.waiting_for_options)
+        await message.answer(
+            "✅ Выбран тип: с вариантами ответов.\n\n"
+            "Шаг 3/6: Введите варианты ответов (каждый вариант с новой строки).\n"
+            "Минимум 2 варианта, максимум 10.\n\n"
+            "<b>Пример:</b>\n"
+            "Вариант 1\n"
+            "Вариант 2\n"
+            "Вариант 3",
+            parse_mode="HTML"
+        )
+    elif message.text.strip() == '2':
+        await state.update_data(question_type='open')
+        await state.set_state(AddQuestionState.waiting_for_correct_answer)
+        await message.answer(
+            "✅ Выбран тип: открытый вопрос.\n\n"
+            "Шаг 4/6: Введите правильный ответ:\n\n"
+            "<i>Примечание: бот будет проверять ответ с учетом регистра и возможных опечаток.</i>",
+            parse_mode="HTML"
+        )
+    else:
+        await message.answer("❌ Введите 1 или 2.")
+
+@router.message(AddQuestionState.waiting_for_correct_answer)
+async def process_correct_answer(message: Message, state: FSMContext):
+    if not is_admin(message):
+        return
+    
+    await state.update_data(correct_answer=message.text.strip())
+    await state.set_state(AddQuestionState.waiting_for_explanation)
+    await message.answer(
+        "✅ Правильный ответ сохранен.\n\n"
+        "Шаг 5/6: Введите объяснение правильного ответа "
+        "(почему этот ответ верный):",
         parse_mode="HTML"
     )
 
@@ -362,24 +419,36 @@ async def process_level(message: Message, state: FSMContext):
         return
     
     data = await state.get_data()
-    new_question = {
-        "question": data.get('question_text'),
-        "options": data.get('options'),
-        "correct_index": data.get('correct_index'),
-        "explanation": data.get('explanation'),
-        "level": level
-    }
+    question_type = data.get('question_type')
     
-    # Добавляем вопрос в базу
+    # Создаем вопрос в зависимости от типа
+    if question_type == 'open':
+        new_question = {
+            "question": data.get('question_text'),
+            "correct_answer": data.get('correct_answer'),
+            "explanation": data.get('explanation'),
+            "level": level
+        }
+        question_info = f"<b>Ответ:</b> {new_question['correct_answer']}"
+    else:
+        new_question = {
+            "question": data.get('question_text'),
+            "options": data.get('options'),
+            "correct_index": data.get('correct_index'),
+            "explanation": data.get('explanation'),
+            "level": level
+        }
+        question_info = f"<b>Вариантов:</b> {len(new_question['options'])}"
+    
     Questions_db.append(new_question)
     
-    # Сохраняем в файл
     if save_questions(Questions_db):
+        type_name = "открытый" if question_type == 'open' else "с вариантами"
         await message.answer(
-            "✅ <b>Вопрос успешно добавлен!</b>\n\n"
+            f"✅ <b>Вопрос ({type_name}) успешно добавлен!</b>\n\n"
             f"<b>Вопрос:</b> {new_question['question']}\n"
             f"<b>Уровень:</b> {level}\n"
-            f"<b>Вариантов:</b> {len(new_question['options'])}\n\n"
+            f"{question_info}\n\n"
             "Теперь этот вопрос доступен для викторины.",
             parse_mode="HTML",
             reply_markup=replyKeyboard()
@@ -392,7 +461,6 @@ async def process_level(message: Message, state: FSMContext):
         )
     
     await state.clear()
-
 @router.message(Command('view_questions'))
 async def view_questions(message: Message):
     """Показывает статистику по вопросам (только для админа)"""
@@ -432,3 +500,5 @@ async def admin_panel(message: Message):
         "/view_questions - Посмотреть статистику вопросов",
         parse_mode="HTML"
     )
+
+router.include_router(open_questions_router)

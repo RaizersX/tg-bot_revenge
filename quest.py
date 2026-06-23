@@ -6,7 +6,9 @@ class QuizState(StatesGroup):
 
 class AddQuestionState(StatesGroup):
     waiting_for_question = State()
+    waiting_for_question_type = State()  
     waiting_for_options = State()
+    waiting_for_correct_answer = State()    
     waiting_for_correct_index = State()
     waiting_for_explanation = State()
     waiting_for_level = State()
