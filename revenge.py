@@ -392,3 +392,43 @@ async def process_level(message: Message, state: FSMContext):
         )
     
     await state.clear()
+
+@router.message(Command('view_questions'))
+async def view_questions(message: Message):
+    """Показывает статистику по вопросам (только для админа)"""
+    if not is_admin(message):
+        await message.answer("❌ У вас нет прав для выполнения этой команды.")
+        return
+    
+    if not Questions_db:
+        await message.answer("📭 База вопросов пуста.")
+        return
+    
+    stats = {}
+    for q in Questions_db:
+        level = q.get('level', 0)
+        stats[level] = stats.get(level, 0) + 1
+    
+    response = "📊 <b>Статистика вопросов:</b>\n\n"
+    response += f"Всего вопросов: {len(Questions_db)}\n\n"
+    
+    for level in sorted(stats.keys()):
+        level_name = {1: "Легкий", 2: "Средний", 3: "Сложный"}.get(level, f"Уровень {level}")
+        response += f"• {level_name} (Уровень {level}): {stats[level]} вопросов\n"
+    
+    await message.answer(response, parse_mode="HTML")
+
+@router.message(F.text == '⚙️ Админ панель')
+async def admin_panel(message: Message):
+    """Админ панель через кнопку"""
+    if not is_admin(message):
+        await message.answer("❌ У вас нет доступа к админ панели.")
+        return
+    
+    await message.answer(
+        "⚙️ <b>Админ панель</b>\n\n"
+        "Доступные команды:\n"
+        "/add_question - Добавить новый вопрос\n"
+        "/view_questions - Посмотреть статистику вопросов",
+        parse_mode="HTML"
+    )
